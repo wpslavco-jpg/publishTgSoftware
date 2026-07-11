@@ -1,0 +1,36 @@
+---
+description: Decision framework for creating microservices
+alwaysApply: true
+---
+
+# Microservice Decision Rule
+
+Do not create a microservice automatically.
+
+A microservice must be justified.
+
+Before creating a microservice, answer:
+
+1. What business capability does it own?
+2. What data does it own?
+3. Who owns its lifecycle?
+4. Can it be deployed independently?
+5. Does it need independent scaling?
+6. Does it have different reliability or security requirements?
+7. What contracts does it expose?
+8. How will it communicate with other services?
+9. What consistency model is required?
+10. How will failures be handled?
+11. What is the operational cost?
+12. Why is a module inside an existing service not enough?
+
+If the answers are weak, use a module inside the current service.
+
+Prefer:
+- modular monolith first
+- explicit boundaries
+- domain events
+- clean package structure
+- no shared database writes across future service boundaries
+
+Create a microservice only when the business and operational benefits outweigh the complexity.

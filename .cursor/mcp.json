@@ -1,0 +1,49 @@
+{
+    "mcpServers": {
+      "filesystem": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "/Users/sergejkavalerov/IdeaProjects/geek-parser"
+        ]
+      },
+      "git": {
+        "command": "/Users/sergejkavalerov/.local/bin/uvx",
+        "args": [
+          "mcp-server-git",
+          "--repository",
+          "/Users/sergejkavalerov/IdeaProjects/geek-parser"
+        ]
+      },
+      "postgres": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-postgres",
+          "postgresql://user:password@localhost:5432/app_db"
+        ]
+      },
+      "context7": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@upstash/context7-mcp"
+        ]
+      },
+      "sequential-thinking": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sequential-thinking"
+        ]
+      },
+      "memory": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-memory"
+        ]
+      }
+    }
+  }

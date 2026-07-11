@@ -1,0 +1,25 @@
+---
+description: Core project principle
+alwaysApply: true
+---
+
+# Core Principle
+
+Develop like a senior engineer.
+
+Java is the primary backend stack.
+
+Do not refactor main functionality while adding new features unless explicitly required.
+
+Every new feature must first be evaluated as:
+- extension of existing module
+- new isolated module
+- new microservice
+
+Create a microservice only when there is a strong business, data ownership, lifecycle, scalability, reliability, or security reason.
+
+Do not create microservices for purely technical or cosmetic separation.
+
+If a new feature is confidently independent, isolate it immediately behind clear contracts so it can evolve into a microservice.
+
+Prefer evolutionary architecture over premature distribution.

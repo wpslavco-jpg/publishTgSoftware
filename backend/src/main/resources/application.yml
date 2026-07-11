@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: content-platform
+  codec:
+    max-in-memory-size: 5MB
+  datasource:
+    url: ${APP_DATASOURCE_URL:jdbc:postgresql://localhost:5432/app_db}
+    username: ${APP_DATASOURCE_USERNAME:user}
+    password: ${APP_DATASOURCE_PASSWORD:password}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  storage:
+    raw-directory: ${APP_RAW_ARTICLES_DIR:../storage/articles/raw}
+  llm:
+    base-url: ${APP_LLM_BASE_URL:https://ask.chadgpt.ru/api/v1}
+    api-key: ${APP_LLM_API_KEY:}
+    model: ${APP_LLM_MODEL:gpt-5-mini}
+    connect-timeout: ${APP_LLM_CONNECT_TIMEOUT:5s}
+    read-timeout: ${APP_LLM_READ_TIMEOUT:60s}
+  telegram:
+    api-base-url: ${APP_TELEGRAM_API_BASE_URL:https://api.telegram.org}
+    proxy-host: ${APP_TELEGRAM_PROXY_HOST:}
+    proxy-port: ${APP_TELEGRAM_PROXY_PORT:0}
+    bot-token: ${APP_TELEGRAM_BOT_TOKEN:}
+    chat-id: ${APP_TELEGRAM_CHAT_ID:}
+    bot-username: ${APP_TELEGRAM_BOT_USERNAME:}
+    draft-chat-id: ${APP_TELEGRAM_DRAFT_CHAT_ID:}
+  telegram-user-client:
+    base-url: ${APP_TELEGRAM_USER_CLIENT_URL:http://localhost:8090}
+    enabled: ${APP_TELEGRAM_USER_CLIENT_ENABLED:true}
+  scheduling:
+    ingestion-cron: ${APP_INGESTION_CRON:0 0 */2 * * *}
+    publication-cron: ${APP_PUBLICATION_CRON:0/30 * * * * *}
+  cors:
+    allowed-origin: ${APP_ADMIN_ORIGIN:http://localhost:5173}
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:content-platform}]"

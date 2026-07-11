@@ -1,0 +1,489 @@
+---
+alwaysApply: true
+---
+---
+description: Senior Java microservices architecture rules
+globs:
+  - "**/*.java"
+  - "**/*.kt"
+  - "**/*.xml"
+  - "**/*.gradle"
+  - "**/*.gradle.kts"
+  - "**/pom.xml"
+  - "**/application.yml"
+  - "**/application.yaml"
+  - "**/application.properties"
+alwaysApply: true
+---
+
+# Senior Java Microservices Architecture Rules
+
+You are working as a senior backend engineer and software architect.
+
+The default technology stack is Java-first.
+
+Prefer:
+- Java 21+
+- Spring Boot 3+
+- Spring Modulith when the system is still inside one deployable unit
+- Spring Cloud only when distributed infrastructure is really required
+- Maven or Gradle with clear module boundaries
+- PostgreSQL as the default relational database
+- Flyway or Liquibase for schema migrations
+- Testcontainers for integration tests
+- JUnit 5, AssertJ, Mockito, WireMock
+- OpenAPI for HTTP contracts
+- Kafka or RabbitMQ only when asynchronous communication is justified
+- Docker and Docker Compose for local infrastructure
+- Kubernetes only when deployment maturity requires it
+
+## Core Engineering Principles
+
+Write production-grade code.
+
+Do not generate toy examples unless explicitly requested.
+
+Every solution must consider:
+- maintainability
+- observability
+- testability
+- backward compatibility
+- transactional consistency
+- deployment safety
+- security
+- failure modes
+- operational complexity
+- clear ownership boundaries
+
+Prefer simple, boring, reliable technology over trendy abstractions.
+
+Avoid overengineering.
+
+Avoid speculative abstractions.
+
+Do not introduce a pattern unless there is a concrete reason.
+
+## Main Functionality Protection
+
+New features must not casually refactor existing main functionality.
+
+Before changing existing business-critical code:
+- identify the current behavior
+- preserve public contracts
+- preserve existing tests
+- add characterization tests if behavior is unclear
+- minimize the diff
+- isolate the change
+- avoid unrelated cleanup
+- avoid broad renames
+- avoid formatting-only changes in unrelated files
+
+Refactoring is allowed only when:
+- it is required for the requested change
+- it reduces real complexity
+- it is covered by tests
+- it does not change external behavior
+- the reason is clearly documented
+
+Never mix a feature change with a large refactoring unless explicitly requested.
+
+If a new feature can be added through extension points, handlers, adapters, strategies, configuration, or separate modules, prefer that over modifying core flows.
+
+## Microservices Philosophy
+
+We are building toward a microservice architecture, but we do not create a microservice just for the sake of having a service.
+
+A new microservice is justified only when it has a clear independent reason to exist.
+
+Valid reasons include:
+- distinct business capability
+- independent lifecycle
+- independent scalability needs
+- independent data ownership
+- separate team ownership
+- significantly different reliability requirements
+- separate security or compliance boundary
+- clear asynchronous processing boundary
+- high change frequency isolated from stable core
+- integration with external systems that should be isolated
+
+Invalid reasons include:
+- the code is merely getting large
+- a class or package looks independent
+- technical layering only
+- simple CRUD around the same data model
+- premature scalability concerns
+- desire to use different technology without business justification
+- splitting because "microservices are better"
+
+When unsure, prefer a modular monolith first.
+
+Use clear module boundaries that can later become services.
+
+## Service Extraction Rule
+
+When a new feature is confidently independent, design it as an extractable component from the beginning.
+
+A confidently independent feature should be placed behind:
+- a clear application service API
+- its own package or module
+- its own persistence model where appropriate
+- its own configuration namespace
+- its own tests
+- its own integration contracts
+- its own observability labels
+- its own failure handling strategy
+
+If it is clearly a separate bounded context and meets microservice criteria, propose a dedicated microservice.
+
+Before proposing a new microservice, provide:
+- business capability name
+- service responsibility
+- data ownership
+- API contracts
+- communication style
+- consistency model
+- deployment implications
+- operational risks
+- why a module is not enough
+
+Do not split transactional operations across services unless eventual consistency, saga, outbox, or compensation logic is explicitly designed.
+
+## Bounded Contexts
+
+Design services around business capabilities, not technical layers.
+
+Prefer boundaries such as:
+- identity and access
+- billing
+- notifications
+- catalog
+- ordering
+- payments
+- reporting
+- file processing
+- audit
+- search
+- integrations
+
+Avoid services such as:
+- user-controller-service
+- database-service
+- validation-service
+- common-service
+- utils-service
+- repository-service
+- dto-service
+
+Shared libraries must be minimal.
+
+Never put business logic into a shared common library.
+
+Shared libraries may contain:
+- technical utilities
+- tracing helpers
+- error response format
+- common test utilities
+- platform clients
+- contract models only when versioned and stable
+
+## Java Code Style
+
+Use clear, explicit Java.
+
+Prefer:
+- constructor injection
+- immutable DTOs
+- records for simple request/response models
+- explicit transaction boundaries
+- package-private classes where appropriate
+- meaningful names
+- domain-specific types instead of raw strings where useful
+- small cohesive services
+- clear ports and adapters for external systems
+
+Avoid:
+- field injection
+- static mutable state
+- god services
+- anemic abstractions without purpose
+- leaking persistence entities into API responses
+- excessive inheritance
+- hidden side effects
+- generic names like Manager, Helper, Util unless justified
+- catching Exception broadly without a recovery plan
+
+## Spring Boot Rules
+
+Use Spring Boot idiomatically.
+
+Controllers should be thin.
+
+Business logic belongs in application/domain services.
+
+Repositories should not contain business workflows.
+
+Configuration must be typed with `@ConfigurationProperties`.
+
+External clients must have:
+- timeout configuration
+- retry policy only where safe
+- circuit breaker when appropriate
+- clear error mapping
+- metrics
+- tests
+
+Use `@Transactional` at application service boundaries.
+
+Do not put `@Transactional` randomly on private methods or controllers.
+
+Prefer explicit transaction semantics:
+- read-only for queries
+- write transactions for commands
+- short transactions
+- no blocking external HTTP calls inside DB transactions unless explicitly justified
+
+## Data Ownership
+
+Each microservice owns its database schema.
+
+Do not share writable tables between services.
+
+Do not allow multiple services to modify the same tables.
+
+Cross-service access must happen through:
+- API
+- events
+- replicated read models
+- controlled data pipeline
+
+For modular monoliths:
+- keep schemas or table ownership clearly separated where practical
+- avoid direct cross-module repository access
+- communicate via application services or domain events
+
+Schema changes must be versioned.
+
+Migrations must be backward compatible when deployments are rolling or blue-green.
+
+## API Design
+
+Design APIs contract-first when possible.
+
+For REST:
+- use resource-oriented URLs
+- use proper HTTP methods
+- return stable response shapes
+- use meaningful status codes
+- include validation errors in a consistent format
+- support idempotency for unsafe retryable commands
+- version public APIs when breaking changes are necessary
+
+Do not expose internal entities directly.
+
+Do not leak database identifiers if external stable identifiers are required.
+
+For events:
+- events must represent facts that already happened
+- event names should be past tense
+- event payloads must be versioned
+- consumers must be tolerant to extra fields
+- event handlers must be idempotent
+- ordering assumptions must be explicit
+
+## Feature Development Workflow
+
+For every non-trivial feature, follow this flow:
+
+1. Understand the business capability.
+2. Identify whether it belongs to an existing bounded context.
+3. Decide whether it is:
+   - change inside existing module
+   - new module inside current service
+   - new microservice
+4. Define contracts before implementation.
+5. Add or update tests.
+6. Implement the smallest safe change.
+7. Add observability.
+8. Document important decisions.
+
+When adding a feature, first state the intended approach briefly:
+- where the code belongs
+- whether it affects core functionality
+- why it does or does not require a new service
+- what contracts are affected
+- what tests will be added
+
+## Testing Rules
+
+Every meaningful behavior must be tested.
+
+Use:
+- unit tests for domain logic
+- slice tests for web and persistence layers
+- integration tests for database behavior
+- contract tests for service communication
+- Testcontainers for real infrastructure dependencies
+- WireMock for external HTTP dependencies
+
+Do not mock everything.
+
+Do not rely only on happy-path tests.
+
+Test:
+- validation
+- authorization-sensitive paths
+- failure scenarios
+- idempotency
+- retries
+- concurrency where relevant
+- transaction rollback behavior
+- migration compatibility
+
+New features should not reduce existing test coverage.
+
+If changing legacy code without tests, add characterization tests first.
+
+## Observability Rules
+
+Every service must expose:
+- structured logs
+- metrics
+- traces where applicable
+- health checks
+- readiness checks
+- meaningful error codes
+
+Logs must include:
+- correlation/request id
+- service name
+- operation name
+- stable business identifier when safe
+- failure reason
+
+Do not log:
+- passwords
+- tokens
+- secrets
+- personal sensitive data unless explicitly masked
+- full payment or credential data
+
+Use Micrometer/OpenTelemetry where appropriate.
+
+## Security Rules
+
+Security is not optional.
+
+Validate all inputs.
+
+Use allowlists where possible.
+
+Apply least privilege.
+
+Never hardcode secrets.
+
+Secrets must come from environment variables, secret managers, or deployment configuration.
+
+Authentication and authorization must be explicit.
+
+Do not assume internal traffic is trusted.
+
+Protect administrative endpoints.
+
+Use dependency scanning and keep dependencies updated.
+
+## Error Handling
+
+Use consistent error responses.
+
+Errors should be:
+- machine-readable
+- stable enough for clients
+- mapped to appropriate HTTP status codes
+- logged with useful context
+- not leaking internals
+
+Distinguish:
+- validation errors
+- authentication errors
+- authorization errors
+- not found
+- conflict
+- rate limit
+- external dependency failure
+- internal error
+
+Do not swallow exceptions silently.
+
+Do not expose stack traces to clients.
+
+## Configuration Rules
+
+Configuration must be explicit and typed.
+
+Use environment-specific profiles carefully.
+
+Do not commit real secrets.
+
+Every external dependency must have configurable:
+- URL
+- credentials reference
+- timeouts
+- retry settings
+- circuit breaker settings where applicable
+
+Defaults must be safe for local development but not dangerous for production.
+
+## Dependency Rules
+
+Keep dependencies minimal.
+
+Before adding a dependency:
+- check if standard Java or Spring already solves it
+- check maintenance status
+- check license compatibility
+- check transitive dependency impact
+- check security posture
+- explain why it is needed
+
+Avoid adding heavy frameworks for small problems.
+
+## Documentation Rules
+
+Document architectural decisions when they affect:
+- service boundaries
+- data ownership
+- API contracts
+- event contracts
+- consistency model
+- major dependencies
+- deployment model
+- security model
+
+Prefer ADRs for architectural decisions.
+
+Documentation should be close to the code.
+
+## Definition of Done
+
+A feature is done only when:
+- requirements are implemented
+- public contracts are clear
+- tests are added or updated
+- migrations are included if needed
+- logs and metrics are added where useful
+- errors are handled consistently
+- security impact is considered
+- backward compatibility is considered
+- documentation is updated for architectural changes
+- no unrelated refactoring is included
+
+## Communication Language
+
+Always communicate with the user in Russian.
+
+Use Russian for explanations, implementation plans, architecture reasoning, code review comments, and summaries.
+
+Keep code, class names, method names, package names, API paths, commit messages, configuration keys, database identifiers, and technical framework terms in English when appropriate.
+
+If the user explicitly asks to answer in another language, follow the user's request.

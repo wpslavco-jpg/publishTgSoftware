@@ -1,0 +1,39 @@
+---
+description: Rules for implementing new features safely
+alwaysApply: true
+---
+
+# New Feature Implementation Rule
+
+When implementing a new feature, do not immediately modify the core flow.
+
+First determine the safest extension strategy.
+
+Prefer adding:
+- new application service
+- new use case handler
+- new adapter
+- new controller endpoint
+- new module
+- new event consumer
+- new scheduled job
+- new integration component
+
+over changing central existing logic.
+
+If existing main functionality must be changed, keep the change minimal and covered by tests.
+
+Before coding, provide a short implementation plan:
+- affected bounded context
+- whether this is a module or microservice candidate
+- existing functionality touched
+- new contracts introduced
+- tests to add
+- migration needs
+- observability needs
+
+Do not perform broad refactoring unless explicitly requested.
+
+If a new component becomes confidently independent, isolate it so that it can be extracted into a microservice later.
+
+If it clearly meets microservice extraction criteria, propose a service boundary before implementing.

@@ -1,0 +1,82 @@
+---
+description: Java and Spring Boot code quality rules
+globs:
+  - "**/*.java"
+  - "**/pom.xml"
+  - "**/*.gradle"
+  - "**/*.gradle.kts"
+alwaysApply: true
+---
+
+# Java Spring Code Quality
+
+Use Java 21 or newer unless the project explicitly uses another version.
+
+Use Spring Boot 3 or newer unless constrained by existing project requirements.
+
+Code must be readable, explicit, and maintainable.
+
+## Structure
+
+Prefer package-by-feature or package-by-bounded-context over package-by-technical-layer.
+
+Good:
+```text
+com.company.app.order
+  api
+  application
+  domain
+  infrastructure
+Avoid global dumping grounds:
+Plaintext
+
+Копировать код
+
+com.company.app.service
+com.company.app.util
+com.company.app.dto
+com.company.app.repository
+
+Controllers
+Controllers must:
+validate requests
+delegate to application services
+map responses
+not contain business logic
+not manage transactions directly
+Application Services
+Application services must:
+orchestrate use cases
+define transaction boundaries
+call domain logic
+call repositories and ports
+avoid leaking infrastructure details
+Domain
+Domain code should not depend on Spring when avoidable.
+Domain logic should be testable without application context.
+Persistence
+Do not expose JPA entities directly through APIs.
+Use repositories only within owning module/context.
+Avoid cross-context repository access.
+Use optimistic locking where concurrent updates are possible.
+DTOs
+Use records for simple immutable DTOs.
+Validate incoming DTOs using Jakarta Validation.
+Do not reuse persistence entities as DTOs.
+Transactions
+Keep transactions short.
+Do not call slow external systems inside database transactions.
+Use outbox pattern for reliable event publication after database changes.
+External Calls
+External clients must define:
+timeout
+retry policy
+error mapping
+metrics
+tests
+Retries must be safe and idempotent.
+Tests
+For every new use case, add tests at the right level.
+Do not use only SpringBootTest for everything.
+Prefer focused tests.
+Markdown

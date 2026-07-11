@@ -1,0 +1,68 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: geek-parser-postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  backend:
+    build:
+      context: ./backend
+    container_name: geek-parser-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      telegram-user-client:
+        condition: service_started
+    environment:
+      APP_DATASOURCE_URL: jdbc:postgresql://postgres:5432/app_db
+      APP_DATASOURCE_USERNAME: user
+      APP_DATASOURCE_PASSWORD: password
+      APP_ADMIN_ORIGIN: http://localhost:5173
+      APP_RAW_ARTICLES_DIR: /data/raw
+      APP_LLM_BASE_URL: ${APP_LLM_BASE_URL:-https://ask.chadgpt.ru}
+      APP_LLM_API_KEY: ${APP_LLM_API_KEY:-}
+      APP_LLM_MODEL: ${APP_LLM_MODEL:-gpt-4o}
+      APP_TELEGRAM_BOT_TOKEN: ${APP_TELEGRAM_BOT_TOKEN:-}
+      APP_TELEGRAM_CHAT_ID: ${APP_TELEGRAM_CHAT_ID:-}
+      APP_TELEGRAM_BOT_USERNAME: ${APP_TELEGRAM_BOT_USERNAME:-}
+      APP_TELEGRAM_PROXY_HOST: ${APP_TELEGRAM_PROXY_HOST:-}
+      APP_TELEGRAM_PROXY_PORT: ${APP_TELEGRAM_PROXY_PORT:-0}
+      APP_TELEGRAM_USER_CLIENT_URL: http://telegram-user-client:8090
+      APP_TELEGRAM_USER_CLIENT_ENABLED: ${APP_TELEGRAM_USER_CLIENT_ENABLED:-true}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./storage/articles/raw:/data/raw
+  telegram-user-client:
+    build:
+      context: ./services/telegram-user-client
+    container_name: geek-parser-telegram-user
+    environment:
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:-}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:-}
+      TELEGRAM_USER_SESSION: ${TELEGRAM_USER_SESSION:-}
+      APP_TELEGRAM_CHAT_ID: ${APP_TELEGRAM_CHAT_ID:-}
+    ports:
+      - "8090:8090"
+  admin:
+    build:
+      context: ./frontend/admin
+    container_name: geek-parser-admin
+    depends_on:
+      - backend
+    ports:
+      - "4173:80"
+
+volumes:
+  postgres_data:

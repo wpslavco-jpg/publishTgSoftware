@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+backend/target/
+.venv-telegram-user/
+
+# Environment
+.env
+.env.local
+
+# Storage (keep structure, ignore article files)
+storage/articles/raw/**/*
+!storage/articles/raw/.gitkeep
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log

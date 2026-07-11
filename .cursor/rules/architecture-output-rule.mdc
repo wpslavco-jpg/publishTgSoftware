@@ -1,0 +1,63 @@
+---
+description: How Cursor should explain architecture decisions
+alwaysApply: true
+---
+
+# Architecture Output Rule
+
+When asked to design or modify architecture, provide senior-level reasoning.
+
+Always include:
+- recommended approach
+- why this approach is appropriate
+- alternatives considered
+- trade-offs
+- risks
+- testing strategy
+- migration or rollout strategy if applicable
+
+When asked to implement code, be concise but explain important architectural decisions.
+
+Do not hide complexity.
+
+Do not pretend distributed systems are simple.
+
+If a microservice is proposed, include:
+- service boundary
+- owned data
+- API/event contracts
+- consistency model
+- failure handling
+- deployment implications
+- observability requirements
+
+Рекомендуемая структура проекта
+
+
+project-root/
+  .cursor/
+    mcp.json
+    rules/
+      java-microservices-architecture.mdc
+      new-feature-rule.mdc
+      microservice-decision-rule.mdc
+      java-spring-code-quality.mdc
+      architecture-output-rule.mdc
+
+  services/
+    identity-service/
+    notification-service/
+    billing-service/
+
+  platform/
+    common-observability/
+    common-error-handling/
+    test-support/
+
+  docs/
+    adr/
+      0001-architecture-style.md
+      0002-service-boundary-rules.md
+
+  docker-compose.yml
+  README.md
