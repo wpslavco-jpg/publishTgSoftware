@@ -1,9 +1,11 @@
 package com.geekparser.contentplatform.admin.api;
 
+import com.geekparser.contentplatform.article.application.ArticleStorageCleanupService;
 import com.geekparser.contentplatform.article.domain.ArticleStatus;
 import com.geekparser.contentplatform.article.domain.PreparedArticle;
 import com.geekparser.contentplatform.article.domain.PreparedArticleRepository;
 import com.geekparser.contentplatform.ingestion.application.IngestionService;
+import com.geekparser.contentplatform.ingestion.application.SourceAdminService;
 import com.geekparser.contentplatform.publishing.application.PublishingService;
 import com.geekparser.contentplatform.publishing.application.TelegramDraftService;
 import com.geekparser.contentplatform.publishing.application.TelegramGateway;
@@ -29,6 +31,8 @@ public class AdminService {
     private final TelegramGateway telegramGateway;
     private final TelegramSettingsService telegramSettingsService;
     private final TelegramDraftService telegramDraftService;
+    private final SourceAdminService sourceAdminService;
+    private final ArticleStorageCleanupService articleStorageCleanupService;
     private final Clock clock;
 
     public AdminService(PreparedArticleRepository preparedArticleRepository,
@@ -39,6 +43,8 @@ public class AdminService {
                         TelegramGateway telegramGateway,
                         TelegramSettingsService telegramSettingsService,
                         TelegramDraftService telegramDraftService,
+                        SourceAdminService sourceAdminService,
+                        ArticleStorageCleanupService articleStorageCleanupService,
                         Clock clock) {
         this.preparedArticleRepository = preparedArticleRepository;
         this.publicationJobRepository = publicationJobRepository;
@@ -48,6 +54,8 @@ public class AdminService {
         this.telegramGateway = telegramGateway;
         this.telegramSettingsService = telegramSettingsService;
         this.telegramDraftService = telegramDraftService;
+        this.sourceAdminService = sourceAdminService;
+        this.articleStorageCleanupService = articleStorageCleanupService;
         this.clock = clock;
     }
 
@@ -123,6 +131,37 @@ public class AdminService {
     public AdminDtos.SyncResponse syncSources() {
         IngestionService.SyncReport report = ingestionService.syncLast48Hours();
         return new AdminDtos.SyncResponse(report.discovered(), report.stored());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminDtos.SourceResponse> listSources() {
+        return sourceAdminService.listSources();
+    }
+
+    @Transactional
+    public AdminDtos.SourceResponse createSource(AdminDtos.CreateSourceRequest request) {
+        return sourceAdminService.createSource(request);
+    }
+
+    @Transactional
+    public AdminDtos.SourceResponse updateSource(Long id, AdminDtos.UpdateSourceRequest request) {
+        return sourceAdminService.updateSource(id, request);
+    }
+
+    @Transactional
+    public void deleteSource(Long id, boolean deleteArticles) {
+        sourceAdminService.deleteSource(id, deleteArticles);
+    }
+
+    @Transactional
+    public AdminDtos.ClearArticlesResponse clearArticles() {
+        ArticleStorageCleanupService.ClearArticlesResult result = articleStorageCleanupService.clearAllArticles();
+        return new AdminDtos.ClearArticlesResponse(
+                result.deletedRawArticles(),
+                result.deletedPreparedArticles(),
+                result.deletedPublications(),
+                result.deletedMarkdownFiles()
+        );
     }
 
     @Transactional

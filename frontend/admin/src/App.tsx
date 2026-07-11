@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { TelegramEditor } from './TelegramEditor'
+import { SourceAdminPanel } from './SourceAdminPanel'
 import { countSentences } from './telegramFormat'
 import './App.css'
 
@@ -515,6 +516,14 @@ function App() {
           )}
         </main>
       </section>
+
+      <SourceAdminPanel
+        loading={loading}
+        setLoading={setLoading}
+        setMessage={setMessage}
+        onChanged={refreshAll}
+        request={request}
+      />
 
       <section className="bottom-grid">
         <div className="panel">

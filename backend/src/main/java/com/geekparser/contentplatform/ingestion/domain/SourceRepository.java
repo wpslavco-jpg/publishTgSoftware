@@ -8,5 +8,9 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
 
     Optional<Source> findByCode(String code);
 
+    boolean existsByCode(String code);
+
     List<Source> findByActiveTrueOrderByNameAsc();
+
+    List<Source> findAllByOrderByNameAsc();
 }

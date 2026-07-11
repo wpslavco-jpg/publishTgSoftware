@@ -34,8 +34,7 @@ public class SourceScraper {
     }
 
     public List<FetchedArticle> fetchArticlesSince(Source source, OffsetDateTime cutoff) {
-        SourceProfileCatalog.SourceProfile profile = profileCatalog.findByCode(source.getCode())
-                .orElseThrow(() -> new IllegalArgumentException("Unknown source profile: " + source.getCode()));
+        SourceProfileCatalog.SourceProfile profile = profileCatalog.resolveProfile(source);
 
         Document listingDocument = fetchDocument(source.getListingUrl());
         Set<String> articleUrls = extractArticleUrls(listingDocument, profile);

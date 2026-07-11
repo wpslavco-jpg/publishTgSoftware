@@ -46,6 +46,18 @@ public class Source {
     @Column(nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(columnDefinition = "text")
+    private String articleUrlPatterns;
+
+    @Column(columnDefinition = "text")
+    private String bodySelectors;
+
+    @Column(columnDefinition = "text")
+    private String titleSelectors;
+
+    @Column(columnDefinition = "text")
+    private String publishedAtSelectors;
+
     public Long getId() {
         return id;
     }
@@ -120,5 +132,41 @@ public class Source {
 
     public void setUpdatedAt(OffsetDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getArticleUrlPatterns() {
+        return articleUrlPatterns;
+    }
+
+    public void setArticleUrlPatterns(String articleUrlPatterns) {
+        this.articleUrlPatterns = articleUrlPatterns;
+    }
+
+    public String getBodySelectors() {
+        return bodySelectors;
+    }
+
+    public void setBodySelectors(String bodySelectors) {
+        this.bodySelectors = bodySelectors;
+    }
+
+    public String getTitleSelectors() {
+        return titleSelectors;
+    }
+
+    public void setTitleSelectors(String titleSelectors) {
+        this.titleSelectors = titleSelectors;
+    }
+
+    public String getPublishedAtSelectors() {
+        return publishedAtSelectors;
+    }
+
+    public void setPublishedAtSelectors(String publishedAtSelectors) {
+        this.publishedAtSelectors = publishedAtSelectors;
+    }
+
+    public boolean hasScrapingProfile() {
+        return articleUrlPatterns != null && !articleUrlPatterns.isBlank();
     }
 }

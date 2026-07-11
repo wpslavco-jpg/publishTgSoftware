@@ -264,6 +264,59 @@ button:disabled {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+.sources-panel {
+  margin-top: 16px;
+}
+
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.source-list {
+  display: grid;
+  gap: 10px;
+}
+
+.source-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--field-bg);
+}
+
+.source-card-main {
+  display: grid;
+  gap: 6px;
+}
+
+.source-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.source-form {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.badge-ok {
+  background: #1f4d3a;
+}
+
+.badge-off {
+  background: #4d1f1f;
+}
+
 .telegram-preview {
   display: grid;
   gap: 8px;

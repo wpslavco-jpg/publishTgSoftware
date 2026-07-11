@@ -11,8 +11,13 @@ class SourceProfileCatalogTest {
         SourceProfileCatalog catalog = new SourceProfileCatalog();
 
         assertThat(catalog.defaults()).hasSize(5);
-        assertThat(catalog.findByCode("rozetked")).isPresent();
-        assertThat(catalog.findByCode("macrumors")).isPresent();
-        assertThat(catalog.findByCode("3dnews")).isPresent();
+        assertThat(catalog.findBuiltInByCode("rozetked")).isPresent();
+        assertThat(catalog.findBuiltInByCode("macrumors")).isPresent();
+        assertThat(catalog.findBuiltInByCode("3dnews")).isPresent();
+    }
+
+    @Test
+    void shouldParsePatternsFromMultilineText() {
+        assertThat(SourceProfileCatalog.parsePatterns(".+/news/.+\nhttps://example\\.com/.+")).hasSize(2);
     }
 }

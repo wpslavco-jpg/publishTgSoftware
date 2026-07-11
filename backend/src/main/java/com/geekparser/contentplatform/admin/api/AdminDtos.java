@@ -1,6 +1,7 @@
 package com.geekparser.contentplatform.admin.api;
 
 import com.geekparser.contentplatform.article.domain.ArticleStatus;
+import com.geekparser.contentplatform.ingestion.domain.SourceType;
 import com.geekparser.contentplatform.publishing.domain.PublicationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -111,6 +112,62 @@ public final class AdminDtos {
             String firstName,
             String lastName,
             String lastMessageText
+    ) {
+    }
+
+    public record SourceResponse(
+            Long id,
+            String code,
+            String name,
+            SourceType type,
+            String baseUrl,
+            String listingUrl,
+            String rssUrl,
+            boolean active,
+            boolean builtIn,
+            String articleUrlPatterns,
+            String bodySelectors,
+            String titleSelectors,
+            String publishedAtSelectors,
+            OffsetDateTime createdAt,
+            OffsetDateTime updatedAt
+    ) {
+    }
+
+    public record CreateSourceRequest(
+            @NotBlank String code,
+            @NotBlank String name,
+            @NotNull SourceType type,
+            @NotBlank String baseUrl,
+            @NotBlank String listingUrl,
+            String rssUrl,
+            boolean active,
+            @NotBlank String articleUrlPatterns,
+            String bodySelectors,
+            String titleSelectors,
+            String publishedAtSelectors
+    ) {
+    }
+
+    public record UpdateSourceRequest(
+            @NotBlank String name,
+            @NotNull SourceType type,
+            @NotBlank String baseUrl,
+            @NotBlank String listingUrl,
+            String rssUrl,
+            boolean active,
+            @NotBlank String articleUrlPatterns,
+            String bodySelectors,
+            String titleSelectors,
+            String publishedAtSelectors
+    ) {
+    }
+
+    public record ClearArticlesResponse(
+            long deletedRawArticles,
+            long deletedPreparedArticles,
+            long deletedPublications,
+            int deletedMarkdownFiles
     ) {
     }
 }

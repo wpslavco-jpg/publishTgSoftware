@@ -28,15 +28,13 @@ public class SourceBootstrapService {
         OffsetDateTime now = OffsetDateTime.now(clock);
         for (SourceProfileCatalog.SourceProfile profile : sourceProfileCatalog.defaults()) {
             Source source = sourceRepository.findByCode(profile.code()).orElseGet(Source::new);
-            source.setCode(profile.code());
-            source.setName(profile.name());
-            source.setType(profile.type());
-            source.setBaseUrl(profile.baseUrl());
-            source.setListingUrl(profile.listingUrl());
-            source.setRssUrl(profile.rssUrl());
-            source.setActive(true);
-            if (source.getCreatedAt() == null) {
+            boolean isNew = source.getId() == null;
+            if (isNew) {
+                sourceProfileCatalog.applyProfileToSource(source, profile);
+                source.setActive(true);
                 source.setCreatedAt(now);
+            } else {
+                sourceProfileCatalog.applyScrapingFieldsIfMissing(source, profile);
             }
             source.setUpdatedAt(now);
             sourceRepository.save(source);

@@ -3,12 +3,14 @@ package com.geekparser.contentplatform.admin.api;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,6 +26,34 @@ public class AdminController {
     @PostMapping("/sources/sync")
     public AdminDtos.SyncResponse syncSources() {
         return adminService.syncSources();
+    }
+
+    @GetMapping("/sources")
+    public List<AdminDtos.SourceResponse> listSources() {
+        return adminService.listSources();
+    }
+
+    @PostMapping("/sources")
+    public AdminDtos.SourceResponse createSource(@Valid @RequestBody AdminDtos.CreateSourceRequest request) {
+        return adminService.createSource(request);
+    }
+
+    @PutMapping("/sources/{id}")
+    public AdminDtos.SourceResponse updateSource(@PathVariable Long id,
+                                                 @Valid @RequestBody AdminDtos.UpdateSourceRequest request) {
+        return adminService.updateSource(id, request);
+    }
+
+    @DeleteMapping("/sources/{id}")
+    public ResponseEntity<Void> deleteSource(@PathVariable Long id,
+                                             @RequestParam(defaultValue = "false") boolean deleteArticles) {
+        adminService.deleteSource(id, deleteArticles);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/storage/clear-articles")
+    public AdminDtos.ClearArticlesResponse clearArticles() {
+        return adminService.clearArticles();
     }
 
     @GetMapping("/articles")
