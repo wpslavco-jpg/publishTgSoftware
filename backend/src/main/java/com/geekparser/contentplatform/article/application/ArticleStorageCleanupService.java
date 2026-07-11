@@ -55,7 +55,13 @@ public class ArticleStorageCleanupService {
         }
         long deletedRaw = rawArticles.size();
         if (!rawArticles.isEmpty()) {
-            rawArticleRepository.deleteAllInBatch(rawArticles);
+            // deleteAllInBatch() bypasses the persistence context, leaving these
+            // RawArticle entities "managed" with a reference to the Source that the
+            // caller deletes right after this call returns. At commit, Hibernate's
+            // flush then throws TransientObjectException on that stale association.
+            // deleteAll() removes them through the persistence context instead, so
+            // they're properly detached before the Source is deleted.
+            rawArticleRepository.deleteAll(rawArticles);
         }
         int deletedFiles = markdownStorageService.deleteFiles(markdownPaths);
         return new DeleteSourceArticlesResult(deletedRaw, preparedIds.size(), deletedFiles);
