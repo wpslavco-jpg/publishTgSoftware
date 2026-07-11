@@ -6,6 +6,8 @@ import com.geekparser.contentplatform.article.domain.RawArticle;
 import com.geekparser.contentplatform.article.domain.RawArticleRepository;
 import com.geekparser.contentplatform.ingestion.domain.Source;
 import com.geekparser.contentplatform.ingestion.domain.SourceRepository;
+import com.geekparser.contentplatform.ingestion.domain.SourceSeedExclusion;
+import com.geekparser.contentplatform.ingestion.domain.SourceSeedExclusionRepository;
 import com.geekparser.contentplatform.ingestion.domain.SourceType;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -23,17 +25,20 @@ public class SourceAdminService {
     private final RawArticleRepository rawArticleRepository;
     private final SourceProfileCatalog sourceProfileCatalog;
     private final ArticleStorageCleanupService articleStorageCleanupService;
+    private final SourceSeedExclusionRepository sourceSeedExclusionRepository;
     private final Clock clock;
 
     public SourceAdminService(SourceRepository sourceRepository,
                               RawArticleRepository rawArticleRepository,
                               SourceProfileCatalog sourceProfileCatalog,
                               ArticleStorageCleanupService articleStorageCleanupService,
+                              SourceSeedExclusionRepository sourceSeedExclusionRepository,
                               Clock clock) {
         this.sourceRepository = sourceRepository;
         this.rawArticleRepository = rawArticleRepository;
         this.sourceProfileCatalog = sourceProfileCatalog;
         this.articleStorageCleanupService = articleStorageCleanupService;
+        this.sourceSeedExclusionRepository = sourceSeedExclusionRepository;
         this.clock = clock;
     }
 
@@ -85,6 +90,11 @@ public class SourceAdminService {
         }
         if (!linkedArticles.isEmpty()) {
             articleStorageCleanupService.deleteArticlesForSource(source.getId());
+        }
+        if (sourceProfileCatalog.isBuiltIn(source.getCode())
+                && !sourceSeedExclusionRepository.existsById(source.getCode())) {
+            sourceSeedExclusionRepository.save(
+                    new SourceSeedExclusion(source.getCode(), OffsetDateTime.now(clock)));
         }
         sourceRepository.delete(source);
     }
