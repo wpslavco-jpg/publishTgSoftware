@@ -22,17 +22,20 @@ public class SourceAdminService {
     private final SourceRepository sourceRepository;
     private final RawArticleRepository rawArticleRepository;
     private final SourceProfileCatalog sourceProfileCatalog;
+    private final SourceSeedExclusionService sourceSeedExclusionService;
     private final ArticleStorageCleanupService articleStorageCleanupService;
     private final Clock clock;
 
     public SourceAdminService(SourceRepository sourceRepository,
                               RawArticleRepository rawArticleRepository,
                               SourceProfileCatalog sourceProfileCatalog,
+                              SourceSeedExclusionService sourceSeedExclusionService,
                               ArticleStorageCleanupService articleStorageCleanupService,
                               Clock clock) {
         this.sourceRepository = sourceRepository;
         this.rawArticleRepository = rawArticleRepository;
         this.sourceProfileCatalog = sourceProfileCatalog;
+        this.sourceSeedExclusionService = sourceSeedExclusionService;
         this.articleStorageCleanupService = articleStorageCleanupService;
         this.clock = clock;
     }
@@ -50,6 +53,7 @@ public class SourceAdminService {
         if (sourceRepository.existsByCode(request.code())) {
             throw new IllegalArgumentException("Source code already exists: " + request.code());
         }
+        sourceSeedExclusionService.allowReseed(normalizeCode(request.code()));
         validateScrapingConfig(request.articleUrlPatterns());
 
         OffsetDateTime now = OffsetDateTime.now(clock);
@@ -86,7 +90,9 @@ public class SourceAdminService {
         if (!linkedArticles.isEmpty()) {
             articleStorageCleanupService.deleteArticlesForSource(source.getId());
         }
+        String sourceCode = source.getCode();
         sourceRepository.delete(source);
+        sourceSeedExclusionService.excludeBuiltInIfNeeded(sourceCode);
     }
 
     private void applyRequest(Source source, AdminDtos.CreateSourceRequest request) {

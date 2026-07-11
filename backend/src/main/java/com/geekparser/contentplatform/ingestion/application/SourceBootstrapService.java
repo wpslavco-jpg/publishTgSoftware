@@ -14,11 +14,16 @@ public class SourceBootstrapService {
 
     private final SourceRepository sourceRepository;
     private final SourceProfileCatalog sourceProfileCatalog;
+    private final SourceSeedExclusionService sourceSeedExclusionService;
     private final Clock clock;
 
-    public SourceBootstrapService(SourceRepository sourceRepository, SourceProfileCatalog sourceProfileCatalog, Clock clock) {
+    public SourceBootstrapService(SourceRepository sourceRepository,
+                                  SourceProfileCatalog sourceProfileCatalog,
+                                  SourceSeedExclusionService sourceSeedExclusionService,
+                                  Clock clock) {
         this.sourceRepository = sourceRepository;
         this.sourceProfileCatalog = sourceProfileCatalog;
+        this.sourceSeedExclusionService = sourceSeedExclusionService;
         this.clock = clock;
     }
 
@@ -27,6 +32,11 @@ public class SourceBootstrapService {
     public void seedSources() {
         OffsetDateTime now = OffsetDateTime.now(clock);
         for (SourceProfileCatalog.SourceProfile profile : sourceProfileCatalog.defaults()) {
+            if (sourceRepository.findByCode(profile.code()).isEmpty()
+                    && sourceSeedExclusionService.isExcluded(profile.code())) {
+                continue;
+            }
+
             Source source = sourceRepository.findByCode(profile.code()).orElseGet(Source::new);
             boolean isNew = source.getId() == null;
             if (isNew) {
